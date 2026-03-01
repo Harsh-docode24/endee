@@ -17,6 +17,20 @@ import os
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
+def get_venv_python() -> str:
+    """Get the Python executable path inside the venv."""
+    venv_dir = os.path.join(PROJECT_DIR, "venv")
+    if sys.platform == "win32":
+        python_path = os.path.join(venv_dir, "Scripts", "python")
+    else:
+        python_path = os.path.join(venv_dir, "bin", "python")
+    if os.path.exists(python_path) or os.path.exists(python_path + ".exe"):
+        return f'"{python_path}"'
+    # Fallback to system python if venv doesn't exist yet
+    print("⚠️  venv not found — using system Python. Run 'python setup.py install' first.")
+    return sys.executable
+
+
 def run_cmd(cmd: str, desc: str):
     """Run a shell command with description."""
     print(f"\n{'='*60}")
@@ -55,22 +69,22 @@ def start_endee():
 
 def ingest():
     """Run data ingestion pipeline."""
-    run_cmd(f"{sys.executable} ingest.py", "Running data ingestion → Endee")
+    run_cmd(f"{get_venv_python()} ingest.py", "Running data ingestion → Endee")
 
 
 def run_app():
     """Launch Streamlit dashboard."""
-    run_cmd(f"{sys.executable} -m streamlit run app.py", "Launching ScholarMind Dashboard")
+    run_cmd(f"{get_venv_python()} -m streamlit run app.py", "Launching ScholarMind Dashboard")
 
 
 def run_eval():
     """Run evaluation benchmarks."""
-    run_cmd(f"{sys.executable} eval.py", "Running retrieval evaluation")
+    run_cmd(f"{get_venv_python()} eval.py", "Running retrieval evaluation")
 
 
 def run_tests():
     """Run smoke tests."""
-    run_cmd(f"{sys.executable} -m pytest test_scholarmind.py -v", "Running smoke tests")
+    run_cmd(f"{get_venv_python()} -m pytest test_scholarmind.py -v", "Running smoke tests")
 
 
 def show_help():
