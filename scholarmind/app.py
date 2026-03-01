@@ -5,6 +5,10 @@ Interactive UI for semantic search, hybrid search, filtered queries, and RAG Q&A
 
 import streamlit as st
 import time
+import os
+
+# Check RAG availability early
+RAG_AVAILABLE = bool(os.getenv("GEMINI_API_KEY", ""))
 
 # ── Page Config ──
 st.set_page_config(
@@ -229,11 +233,18 @@ def main():
     with st.sidebar:
         st.markdown("### ⚙️ Search Settings")
         
+        available_modes = ["🔍 Search"]
+        if RAG_AVAILABLE:
+            available_modes.append("🤖 Ask AI (RAG)")
+        
         tab_mode = st.radio(
             "Mode",
-            ["🔍 Search", "🤖 Ask AI (RAG)"],
+            available_modes,
             horizontal=True,
         )
+        
+        if not RAG_AVAILABLE:
+            st.caption("ℹ️ Search-only mode. Set `GEMINI_API_KEY` to enable RAG Q&A.")
         
         st.divider()
         

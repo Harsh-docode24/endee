@@ -5,6 +5,8 @@
 
 ScholarMind is an intelligent research paper discovery system that enables researchers to find relevant academic papers using **semantic understanding**, not just keyword matching. It leverages **Endee** as its core vector database to deliver lightning-fast similarity search across a corpus of AI/ML research papers, with a beautiful Streamlit dashboard.
 
+> **Fork Compliance**: This project is built on a fork of the official [endee-io/endee](https://github.com/endee-io/endee) repository (base commit: `f62dbbd`). The `scholarmind/` directory contains the project code.
+
 ---
 
 ## 🎯 Problem Statement
@@ -18,24 +20,24 @@ Researchers spend enormous time finding relevant academic papers. Traditional ke
 ```mermaid
 graph TB
     subgraph Data Ingestion
-        A[📄 Research Papers<br/>papers.json] --> B[Sentence Transformers<br/>all-MiniLM-L6-v2]
-        A --> C[TF-IDF Vectorizer<br/>scikit-learn]
-        B --> D[Dense Vectors<br/>384 dimensions]
-        C --> E[Sparse Vectors<br/>TF-IDF weights]
+        A["📄 Research Papers<br/>papers.json"] --> B["Sentence Transformers<br/>all-MiniLM-L6-v2"]
+        A --> C["TF-IDF Vectorizer<br/>scikit-learn"]
+        B --> D["Dense Vectors<br/>384 dimensions"]
+        C --> E["Sparse Vectors<br/>TF-IDF weights"]
     end
 
     subgraph Endee Vector Database
-        D --> F[(📦 scholarmind_papers<br/>Semantic Index)]
-        D --> G[(📦 scholarmind_papers_hybrid<br/>Hybrid Index)]
+        D --> F[("📦 scholarmind_papers<br/>Semantic Index")]
+        D --> G[("📦 scholarmind_papers_hybrid<br/>Hybrid Index")]
         E --> G
     end
 
     subgraph Search Engine
-        H[🔍 User Query] --> I{Search Mode}
-        I -->|Semantic| J[Dense Embedding Search]
-        I -->|Hybrid| K[Dense + Sparse Search]
-        I -->|Filtered| L[Search + Endee Filters<br/>$eq, $in, $range]
-        I -->|Multi-Area| M[Search + $in Filter]
+        H["🔍 User Query"] --> I{"Search Mode"}
+        I -->|Semantic| J["Dense Embedding Search"]
+        I -->|Hybrid| K["Dense + Sparse Search"]
+        I -->|Filtered| L["Search + Endee Filters<br/>$eq, $in, $range"]
+        I -->|Multi-Area| M["Search + $in Filter"]
         J --> F
         K --> G
         L --> F
@@ -43,14 +45,14 @@ graph TB
     end
 
     subgraph RAG Pipeline
-        N[❓ Research Question] --> O[Endee Retrieval<br/>Top-K Papers]
-        O --> P[Context Builder]
-        P --> Q[Gemini API<br/>gemini-2.0-flash]
-        Q --> R[📝 Cited Answer]
+        N["❓ Research Question"] --> O["Endee Retrieval<br/>Top-K Papers"]
+        O --> P["Context Builder"]
+        P --> Q["Gemini API<br/>gemini-2.0-flash"]
+        Q --> R["📝 Cited Answer"]
     end
 
     subgraph Streamlit Dashboard
-        S[🖥️ Web UI]
+        S["🖥️ Web UI"]
         S --> H
         S --> N
         J --> S
@@ -144,16 +146,39 @@ print(result["sources"])   # Retrieved papers with similarity scores
 
 ---
 
+## 📈 Evaluation & Benchmarks
+
+Retrieval quality is measured using **18 human-labeled queries** with ground-truth relevant paper IDs.
+
+Run the evaluation:
+```bash
+python eval.py
+```
+
+### Metrics
+
+| Metric | Description |
+|---|---|
+| **Recall@5** | Fraction of relevant papers found in top-5 results |
+| **Recall@10** | Fraction of relevant papers found in top-10 results |
+| **MRR@10** | Reciprocal rank of first relevant result in top-10 |
+| **Avg Latency** | Mean query latency in milliseconds |
+| **P95 Latency** | 95th percentile query latency |
+
+Results are saved to `eval_results.json` and printed as a table.
+
+---
+
 ## 🛠️ Tech Stack
 
-| Component | Technology |
-|---|---|
-| **Vector Database** | [Endee](https://github.com/endee-io/endee) (Docker) |
-| **Embeddings** | `sentence-transformers` (all-MiniLM-L6-v2, 384-dim) |
-| **Sparse Vectors** | `scikit-learn` TF-IDF (10,000 features) |
-| **LLM (RAG)** | Google Gemini 2.0 Flash |
-| **Web UI** | Streamlit |
-| **Language** | Python 3.10+ |
+| Component | Technology | Version |
+|---|---|---|
+| **Vector Database** | [Endee](https://github.com/endee-io/endee) (Docker) | latest |
+| **Embeddings** | `sentence-transformers` (all-MiniLM-L6-v2, 384-dim) | 3.3.1 |
+| **Sparse Vectors** | `scikit-learn` TF-IDF (10,000 features) | 1.5.2 |
+| **LLM (RAG)** | Google Gemini 2.0 Flash | 0.8.4 |
+| **Web UI** | Streamlit | 1.41.1 |
+| **Language** | Python | 3.10+ |
 
 ---
 
@@ -164,28 +189,32 @@ print(result["sources"])   # Retrieved papers with similarity scores
 - **Docker Desktop** installed and running
 - **Python 3.10+**
 - **Git**
-- A **Gemini API key** (for RAG Q&A — optional for search-only mode)
+- A **Gemini API key** (optional — for RAG Q&A; search works without it)
 
-### Step 1: Clone the Repository
+### Quick Start (One Command)
 
 ```bash
-git clone https://github.com/<YOUR_USERNAME>/endee.git
+cd scholarmind
+python setup.py all   # install → start Endee → ingest → launch UI
+```
+
+### Step-by-Step
+
+#### 1. Clone the Repository
+
+```bash
+git clone https://github.com/Harsh-docode24/endee.git
 cd endee/scholarmind
 ```
 
-### Step 2: Start Endee Server (Docker)
+#### 2. Start Endee Server (Docker)
 
 ```bash
 docker compose up -d
+docker ps  # Should show "endee-server" container
 ```
 
-Verify the server is running:
-```bash
-docker ps
-# Should show "endee-server" container
-```
-
-### Step 3: Install Python Dependencies
+#### 3. Install Python Dependencies
 
 ```bash
 python -m venv venv
@@ -197,7 +226,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Step 4: Set Environment Variable (for RAG)
+#### 4. Set Environment Variable (Optional — for RAG)
 
 ```bash
 # Windows PowerShell:
@@ -207,20 +236,15 @@ $env:GEMINI_API_KEY="your_api_key_here"
 export GEMINI_API_KEY="your_api_key_here"
 ```
 
-### Step 5: Run Data Ingestion
+> **Note**: The dashboard works fully in **Search-Only Mode** without a Gemini API key. The RAG tab is automatically hidden when no key is set.
+
+#### 5. Run Data Ingestion
 
 ```bash
 python ingest.py
 ```
 
-This will:
-1. Load 45 curated AI/ML research papers
-2. Generate 384-dim dense embeddings using Sentence Transformers
-3. Generate TF-IDF sparse vectors for hybrid search
-4. Create two Endee indexes (`scholarmind_papers` and `scholarmind_papers_hybrid`)
-5. Upsert all vectors with metadata and filter fields
-
-### Step 6: Launch the Dashboard
+#### 6. Launch the Dashboard
 
 ```bash
 streamlit run app.py
@@ -228,11 +252,12 @@ streamlit run app.py
 
 Open `http://localhost:8501` in your browser.
 
-### Step 7: Try It Out!
+#### 7. Run Evaluation (Optional)
 
-- **Search Tab**: Type a query like "transformer attention mechanism" and explore different search modes
-- **RAG Tab**: Ask questions like "What are the key differences between GANs and diffusion models?"
-- **Filters**: Use sidebar to filter by category, area, or year range
+```bash
+python eval.py       # Retrieval benchmarks
+python -m pytest test_scholarmind.py -v  # Smoke tests
+```
 
 ---
 
@@ -240,17 +265,20 @@ Open `http://localhost:8501` in your browser.
 
 ```
 scholarmind/
-├── docker-compose.yml      # Endee server configuration
-├── requirements.txt        # Python dependencies
-├── config.py               # Central configuration (model, indexes, API keys)
-├── ingest.py               # Data ingestion pipeline
-├── search.py               # Multi-mode search engine
-├── rag.py                  # RAG pipeline (Endee + Gemini)
-├── app.py                  # Streamlit web dashboard
+├── docker-compose.yml       # Endee server configuration
+├── requirements.txt         # Pinned Python dependencies
+├── config.py                # Central configuration
+├── ingest.py                # Data ingestion pipeline
+├── search.py                # Multi-mode search engine
+├── rag.py                   # RAG pipeline (Endee + Gemini)
+├── app.py                   # Streamlit web dashboard
+├── eval.py                  # Retrieval evaluation (Recall, MRR, latency)
+├── test_scholarmind.py      # Smoke tests
+├── setup.py                 # One-command setup & run script
 ├── sample_data/
-│   ├── papers.json         # 45 curated AI/ML research papers
+│   ├── papers.json          # 45 curated AI/ML research papers
 │   └── tfidf_vectorizer.pkl # Saved TF-IDF vectorizer (auto-generated)
-└── README.md               # This file
+└── README.md                # This file
 ```
 
 ---
@@ -261,16 +289,16 @@ The sample dataset contains **45 landmark AI/ML research papers** spanning:
 
 | Category | Papers | Examples |
 |---|---|---|
-| Machine Learning | 10 | Adam, Dropout, LoRA, Scaling Laws, FlashAttention |
-| NLP | 8 | Transformer, BERT, GPT-3, LLaMA, Chain-of-Thought |
-| Computer Vision | 6 | ResNet, ViT, YOLO, SAM, EfficientNet |
-| Generative AI | 6 | GANs, Diffusion Models, Stable Diffusion, Sora, DreamBooth |
-| Reinforcement Learning | 5 | DQN, PPO, AlphaGo, Reward Is Enough |
-| AI Safety | 4 | Constitutional AI, RLHF, Sparse Autoencoders |
-| Robotics | 2 | World Models, Robot Learning |
+| Machine Learning | 12 | Adam, Dropout, LoRA, Scaling Laws, FlashAttention, DPO, KAN, Mamba, MoE, NAS |
+| NLP | 8 | Transformer, BERT, GPT-3, LLaMA, Chain-of-Thought, Toolformer |
+| Computer Vision | 6 | ResNet, ViT, YOLO, SAM, EfficientNet, U-Net |
+| Generative AI | 6 | GANs, Diffusion Models, Stable Diffusion, Sora, DreamBooth, Multimodal |
+| Reinforcement Learning | 4 | DQN, PPO, AlphaGo, Reward Is Enough |
+| AI Safety | 4 | Constitutional AI, RLHF, Sparse Autoencoders, Concrete Problems |
 | Graph Neural Networks | 3 | GAT, GCN, GNN Explainability |
+| Robotics | 2 | World Models, Robot Learning |
 
-Each paper includes: title, abstract, authors, year, category, area, and keywords.
+Each paper includes: title, full abstract, authors, year, category, area, and keywords.
 
 ---
 

@@ -111,7 +111,7 @@ def ingest_semantic_index(client: Endee, papers: list[dict], embeddings: np.ndar
             "meta": {
                 "title": paper["title"],
                 "authors": ", ".join(paper["authors"][:3]) + ("..." if len(paper["authors"]) > 3 else ""),
-                "abstract": paper["abstract"][:300],
+                "abstract": paper["abstract"],
                 "year": paper["year"],
                 "category": paper["category"],
                 "keywords": ", ".join(paper.get("keywords", [])),
@@ -154,7 +154,7 @@ def ingest_hybrid_index(client: Endee, papers: list[dict], embeddings: np.ndarra
             "meta": {
                 "title": paper["title"],
                 "authors": ", ".join(paper["authors"][:3]) + ("..." if len(paper["authors"]) > 3 else ""),
-                "abstract": paper["abstract"][:300],
+                "abstract": paper["abstract"],
                 "year": paper["year"],
                 "category": paper["category"],
             },

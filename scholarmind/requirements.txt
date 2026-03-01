@@ -1,8 +1,10 @@
-endee
-sentence-transformers
-scikit-learn
-google-generativeai
-streamlit
-PyPDF2
-rich
-numpy
+# ScholarMind — Python Dependencies
+# Tested with Python 3.10+
+endee==0.1.4
+sentence-transformers==3.3.1
+scikit-learn==1.5.2
+google-generativeai==0.8.4
+streamlit==1.41.1
+PyPDF2==3.0.1
+rich==13.9.4
+numpy==1.26.4
