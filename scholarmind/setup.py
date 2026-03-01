@@ -30,8 +30,18 @@ def run_cmd(cmd: str, desc: str):
 
 
 def install():
-    """Install Python dependencies."""
-    run_cmd(f"{sys.executable} -m pip install -r requirements.txt", "Installing Python dependencies")
+    """Create virtual environment and install Python dependencies."""
+    venv_dir = os.path.join(PROJECT_DIR, "venv")
+    if not os.path.exists(venv_dir):
+        run_cmd(f"{sys.executable} -m venv venv", "Creating virtual environment")
+
+    # Determine pip path inside venv
+    if sys.platform == "win32":
+        pip_path = os.path.join(venv_dir, "Scripts", "pip")
+    else:
+        pip_path = os.path.join(venv_dir, "bin", "pip")
+
+    run_cmd(f"\"{pip_path}\" install -r requirements.txt", "Installing Python dependencies into venv")
 
 
 def start_endee():
