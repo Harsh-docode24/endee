@@ -1,0 +1,8 @@
+endee
+sentence-transformers
+scikit-learn
+google-generativeai
+streamlit
+PyPDF2
+rich
+numpy
